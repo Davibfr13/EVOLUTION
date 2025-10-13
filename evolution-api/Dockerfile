@@ -1,12 +1,12 @@
-# Usa Node 20 (necessário para Evolution API)
+# Usa Node 20 (requisito mínimo)
 FROM node:20-bullseye
 
 WORKDIR /app
 
-# Copiar package.json e package-lock.json primeiro
+# Copiar arquivos de dependência primeiro
 COPY package*.json ./
 
-# Instalar ferramentas do sistema
+# Instalar ferramentas necessárias
 RUN apt-get update && apt-get install -y \
     python3 \
     make \
@@ -14,14 +14,17 @@ RUN apt-get update && apt-get install -y \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-# 🚀 Instalar dependências sem executar scripts (evita erro do husky)
-RUN npm install --omit=dev --ignore-scripts
+# Instalar dependências sem rodar husky
+RUN npm install --ignore-scripts
 
-# Copiar o restante do código
+# Copiar o restante do projeto
 COPY . .
 
-# Expor porta da Evolution API
+# ⚙️ Gerar cliente Prisma
+RUN npx prisma generate
+
+# Expor a porta padrão da Evolution API
 EXPOSE 8080
 
-# Iniciar a aplicação
+# Iniciar a API
 CMD ["npm", "start"]
