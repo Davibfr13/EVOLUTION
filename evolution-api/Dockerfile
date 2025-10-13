@@ -1,13 +1,12 @@
-# Usa Node 20 (obrigatório para Evolution API)
+# Usa Node 20 (necessário para Evolution API)
 FROM node:20-bullseye
 
-# Define o diretório de trabalho
 WORKDIR /app
 
-# Copia os arquivos de dependência primeiro
+# Copiar package.json e package-lock.json primeiro
 COPY package*.json ./
 
-# Instala dependências do sistema necessárias para módulos nativos
+# Instalar ferramentas do sistema
 RUN apt-get update && apt-get install -y \
     python3 \
     make \
@@ -15,14 +14,14 @@ RUN apt-get update && apt-get install -y \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-# Instala dependências de produção
-RUN npm install --omit=dev
+# 🚀 Instalar dependências sem executar scripts (evita erro do husky)
+RUN npm install --omit=dev --ignore-scripts
 
-# Copia o restante dos arquivos do projeto
+# Copiar o restante do código
 COPY . .
 
-# Expõe a porta padrão da Evolution API
+# Expor porta da Evolution API
 EXPOSE 8080
 
-# Inicia o servidor
+# Iniciar a aplicação
 CMD ["npm", "start"]
