@@ -1,20 +1,28 @@
-# Usar Node LTS estável
-FROM node:18-alpine
+# Usa uma imagem mais completa para evitar erros de build
+FROM node:18-bullseye
 
 # Diretório de trabalho
 WORKDIR /app
 
-# Copiar arquivos de definição de dependências
+# Copiar arquivos de dependência primeiro
 COPY package*.json ./
 
-# Instalar dependências
-RUN npm install --production
+# Instalar ferramentas necessárias para compilar dependências nativas
+RUN apt-get update && apt-get install -y \
+    python3 \
+    make \
+    g++ \
+    git \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copiar o restante do projeto
+# Instalar dependências do projeto
+RUN npm install --omit=dev
+
+# Copiar o restante do código
 COPY . .
 
-# Porta padrão da Evolution API
+# Expor a porta padrão da Evolution API
 EXPOSE 8080
 
-# Comando de inicialização
+# Comando para iniciar a API
 CMD ["npm", "start"]
