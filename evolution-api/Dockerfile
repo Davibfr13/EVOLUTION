@@ -20,8 +20,8 @@ RUN npm install --ignore-scripts
 # Copiar o restante do projeto
 COPY . .
 
-# ⚙️ Gerar cliente Prisma
-RUN npx prisma generate
+# ⚙️ Gerar cliente Prisma (com caminho explícito)
+RUN npx prisma generate --schema=src/api/repository/prisma/schema.prisma
 
 # Expor a porta padrão da Evolution API
 EXPOSE 8080
