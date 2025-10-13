@@ -1,34 +1,38 @@
-# ==========================
-# Dockerfile Evolution API
-# ==========================
+# ===============================
+# Dockerfile para Evolution API
+# ===============================
 
-# 1️⃣ Base image Node 20
+# Usar Node 20+ Alpine leve
 FROM node:20-alpine
 
-# 2️⃣ Diretório de trabalho
+# Diretório de trabalho
 WORKDIR /app
 
-# 3️⃣ Desativa Husky
+# Desativar Husky (evita erro no npm install)
 ENV HUSKY=0
 
-# 4️⃣ Copiar package.json e package-lock.json
+# Copiar apenas package.json e package-lock.json para cache
 COPY package*.json ./
 
-# 5️⃣ Instalar dependências de produção sem rodar hooks do Husky
+# Instalar dependências de produção
 RUN npm install --omit=dev
 
-# 6️⃣ Copiar todo o restante do código
+# Copiar restante do código
 COPY . .
 
-# 7️⃣ Gerar cliente Prisma (ajuste caminho se necessário)
+# Gerar Prisma se o schema existir
 RUN if [ -f prisma/schema.prisma ]; then \
-      npx prisma generate --schema=prisma/schema.prisma; \
+        npx prisma generate --schema=prisma/schema.prisma; \
+    elif [ -f src/prisma/schema.prisma ]; then \
+        npx prisma generate --schema=src/prisma/schema.prisma; \
+    elif [ -f src/database/prisma/schema.prisma ]; then \
+        npx prisma generate --schema=src/database/prisma/schema.prisma; \
     else \
-      echo "❌ schema.prisma não encontrado, pule esta etapa"; \
+        echo "❌ schema.prisma não encontrado, pulando geração Prisma"; \
     fi
 
-# 8️⃣ Expor porta padrão da Evolution API
+# Expor porta padrão da Evolution API
 EXPOSE 8080
 
-# 9️⃣ Comando para iniciar a API
+# Comando padrão para iniciar a API
 CMD ["npm", "start"]
