@@ -1,23 +1,25 @@
-# ===============================
-# Dockerfile para Evolution API
-# ===============================
+# ------------------------------
+# Dockerfile Evolution API - Render
+# ------------------------------
 
-# Usar Node 20+ Alpine leve
 FROM node:20-alpine
 
-# Diretório de trabalho
 WORKDIR /app
 
-# Desativar Husky (evita erro no npm install)
+# Desativa Husky e scripts de instalação
 ENV HUSKY=0
+ENV npm_config_ignore_scripts=true
 
-# Copiar apenas package.json e package-lock.json para cache
+# Copiar apenas package.json e package-lock.json (cache)
 COPY package*.json ./
 
-# Instalar dependências de produção
+# Instalar dependências sem rodar scripts
 RUN npm install --omit=dev
 
-# Copiar restante do código
+# Permitir scripts novamente para start/build
+ENV npm_config_ignore_scripts=false
+
+# Copiar todo o restante do projeto
 COPY . .
 
 # Gerar Prisma se o schema existir
@@ -31,8 +33,8 @@ RUN if [ -f prisma/schema.prisma ]; then \
         echo "❌ schema.prisma não encontrado, pulando geração Prisma"; \
     fi
 
-# Expor porta padrão da Evolution API
+# Expor porta padrão
 EXPOSE 8080
 
-# Comando padrão para iniciar a API
+# Start da API
 CMD ["npm", "start"]
