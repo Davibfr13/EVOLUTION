@@ -1,7 +1,7 @@
 FROM node:20-alpine
 WORKDIR /app
 
-# Ignorar Husky no build
+# Ignorar Husky para produção
 ENV HUSKY=0
 
 # Copiar package.json e package-lock.json
