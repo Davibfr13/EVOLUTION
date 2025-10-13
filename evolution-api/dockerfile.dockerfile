@@ -1,29 +1,20 @@
-# Use a imagem oficial do Node.js
+# Usar Node LTS estável
 FROM node:18-alpine
 
-# Define o diretório de trabalho
+# Diretório de trabalho
 WORKDIR /app
 
-# Copia os arquivos de configuração do package
+# Copiar arquivos de definição de dependências
 COPY package*.json ./
-COPY yarn.lock ./
 
-# Instala as dependências
-RUN npm install -g pm2
-RUN npm install
+# Instalar dependências
+RUN npm install --production
 
-# Copia todo o código fonte
+# Copiar o restante do projeto
 COPY . .
 
-# Cria diretório para logs
-RUN mkdir -p logs
-
-# Expõe a porta (a mesma que a Evolution API usa)
+# Porta padrão da Evolution API
 EXPOSE 8080
 
-# Define variáveis de ambiente
-ENV NODE_ENV=production
-ENV PORT=8080
-
-# Comando para iniciar a aplicação com PM2 (recomendado para produção)
-CMD ["pm2-runtime", "start", "ecosystem.config.js", "--env", "production"]
+# Comando de inicialização
+CMD ["npm", "start"]
