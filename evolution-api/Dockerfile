@@ -1,33 +1,40 @@
-# Usa Node 20 (requisito mínimo)
-FROM node:20-bullseye
+# 🏗️ Etapa base: Node com suporte ao Prisma e TSX
+FROM node:20-alpine
 
+# 📂 Definir diretório de trabalho
 WORKDIR /app
 
-# Copiar arquivos de dependência primeiro
+# ⚙️ Copiar apenas os arquivos essenciais para instalar dependências
 COPY package*.json ./
 
-# Instalar ferramentas necessárias
-RUN apt-get update && apt-get install -y \
-    python3 \
-    make \
-    g++ \
-    git \
-    && rm -rf /var/lib/apt/lists/*
+# 🧩 Instalar dependências de produção
+RUN npm install --production
 
-# Instalar dependências sem rodar husky
-RUN npm install --ignore-scripts
-
-# Copiar o restante do projeto
+# 📦 Copiar o restante do código
 COPY . .
 
-# 🧠 Detecta e gera o Prisma schema automaticamente
-RUN if [ -f prisma/schema.prisma ]; then npx prisma generate --schema=prisma/schema.prisma; \
-    elif [ -f src/prisma/schema.prisma ]; then npx prisma generate --schema=src/prisma/schema.prisma; \
-    elif [ -f src/database/prisma/schema.prisma ]; then npx prisma generate --schema=src/database/prisma/schema.prisma; \
-    else echo "❌ schema.prisma não encontrado"; exit 1; fi
+# 🧠 Garantir que o schema.prisma exista (baixar se estiver ausente)
+RUN if [ ! -f prisma/schema.prisma ] && [ ! -f src/prisma/schema.prisma ] && [ ! -f src/database/prisma/schema.prisma ]; then \
+      echo "📥 Baixando schema.prisma padrão da Evolution API..."; \
+      mkdir -p src/database/prisma && \
+      wget -q -O src/database/prisma/schema.prisma https://raw.githubusercontent.com/EvolutionAPI/evolution-api/main/src/database/prisma/schema.prisma; \
+    else \
+      echo "✅ schema.prisma encontrado localmente."; \
+    fi
 
-# Expor a porta padrão da Evolution API
+# ⚙️ Detectar e gerar cliente Prisma automaticamente
+RUN if [ -f prisma/schema.prisma ]; then \
+      npx prisma generate --schema=prisma/schema.prisma; \
+    elif [ -f src/prisma/schema.prisma ]; then \
+      npx prisma generate --schema=src/prisma/schema.prisma; \
+    elif [ -f src/database/prisma/schema.prisma ]; then \
+      npx prisma generate --schema=src/database/prisma/schema.prisma; \
+    else \
+      echo "❌ Nenhum schema.prisma encontrado!"; exit 1; \
+    fi
+
+# 🌐 Expor porta padrão da Evolution API
 EXPOSE 8080
 
-# Iniciar a API
+# ▶️ Comando de inicialização
 CMD ["npm", "start"]
