@@ -7,8 +7,7 @@
 
 "scripts": {
   "build": "npx prisma generate --schema ./prisma/postgresql-schema.prisma && tsc --noEmit && tsup",
-  "start": "npx prisma generate --schema ./prisma/postgresql-schema.prisma && tsx ./src/main.ts",
-  "start:prod": "npx prisma generate --schema ./prisma/postgresql-schema.prisma && node dist/main",
+  "start": "node dist/main.js",
   "db:generate": "npx prisma generate --schema ./prisma/postgresql-schema.prisma",
   "db:deploy": "npx prisma migrate deploy --schema ./prisma/postgresql-schema.prisma"
 },
