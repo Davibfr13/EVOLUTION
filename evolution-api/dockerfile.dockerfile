@@ -1,29 +1,28 @@
-# Use a imagem oficial do Node.js
-FROM node:18-alpine
+# Usa uma imagem mais completa para evitar erros de build
+FROM node:18-bullseye
 
-# Define o diretório de trabalho
+# Diretório de trabalho
 WORKDIR /app
 
-# Copia os arquivos de configuração do package
+# Copiar arquivos de dependência primeiro
 COPY package*.json ./
-COPY yarn.lock ./
 
-# Instala as dependências
-RUN npm install -g pm2
-RUN npm install
+# Instalar ferramentas necessárias para compilar dependências nativas
+RUN apt-get update && apt-get install -y \
+    python3 \
+    make \
+    g++ \
+    git \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copia todo o código fonte
+# Instalar dependências do projeto
+RUN npm install --omit=dev
+
+# Copiar o restante do código
 COPY . .
 
-# Cria diretório para logs
-RUN mkdir -p logs
-
-# Expõe a porta (a mesma que a Evolution API usa)
+# Expor a porta padrão da Evolution API
 EXPOSE 8080
 
-# Define variáveis de ambiente
-ENV NODE_ENV=production
-ENV PORT=8080
-
-# Comando para iniciar a aplicação com PM2 (recomendado para produção)
-CMD ["pm2-runtime", "start", "ecosystem.config.js", "--env", "production"]
+# Comando para iniciar a API
+CMD ["npm", "start"]
