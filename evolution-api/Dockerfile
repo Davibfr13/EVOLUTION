@@ -6,7 +6,8 @@ COPY package*.json ./
 RUN npm ci
 
 COPY . .
-RUN npm run db:generate
+# Gera o Prisma Client com o schema PostgreSQL
+RUN npx prisma generate --schema ./prisma/postgresql-schema.prisma
 RUN npm run build
 
 # Etapa 2 — Imagem final
@@ -17,7 +18,7 @@ COPY --from=builder /app ./
 ENV NODE_ENV=production
 EXPOSE 8080
 
-# Garante que o Prisma Client está disponível
-RUN npx prisma generate --schema ./prisma/DATABASE_PROVIDER-schema.prisma
+# Garante que o Prisma Client está atualizado
+RUN npx prisma generate --schema ./prisma/postgresql-schema.prisma
 
 CMD ["npm", "start"]

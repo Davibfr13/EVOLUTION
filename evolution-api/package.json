@@ -5,12 +5,12 @@
   "main": "./dist/main.js",
   "type": "commonjs",
 
-  "scripts": {
-  "build": "npm run db:generate && tsc --noEmit && tsup",
-  "start": "npm run db:generate && tsx ./src/main.ts",
-  "start:prod": "npm run db:generate && node dist/main",
-  "db:generate": "node runWithProvider.js \"npx prisma generate --schema ./prisma/DATABASE_PROVIDER-schema.prisma\"",
-  "db:deploy": "node runWithProvider.js \"rm -rf ./prisma/migrations && cp -r ./prisma/DATABASE_PROVIDER-migrations ./prisma/migrations && npx prisma migrate deploy --schema ./prisma/DATABASE_PROVIDER-schema.prisma\""
+"scripts": {
+  "build": "npx prisma generate --schema ./prisma/postgresql-schema.prisma && tsc --noEmit && tsup",
+  "start": "npx prisma generate --schema ./prisma/postgresql-schema.prisma && tsx ./src/main.ts",
+  "start:prod": "npx prisma generate --schema ./prisma/postgresql-schema.prisma && node dist/main",
+  "db:generate": "npx prisma generate --schema ./prisma/postgresql-schema.prisma",
+  "db:deploy": "npx prisma migrate deploy --schema ./prisma/postgresql-schema.prisma"
 },
   "repository": {
     "type": "git",
