@@ -6,7 +6,6 @@ COPY package*.json ./
 RUN npm ci
 COPY . .
 
-# Gera Prisma Client e builda o app
 RUN npx prisma generate --schema ./prisma/postgresql-schema.prisma
 RUN npm run build
 
@@ -17,4 +16,5 @@ COPY --from=builder /app ./
 ENV NODE_ENV=production
 EXPOSE 8080
 
-CMD ["npm", "start"]
+# Executa o db push no início e depois inicia o app
+CMD ["sh", "-c", "npx prisma db push --schema ./prisma/postgresql-schema.prisma --accept-data-loss && npm start"]
